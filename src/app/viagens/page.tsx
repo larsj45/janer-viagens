@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { trips, tripMembers, getTripMembers, getTripFlights, getTripAccommodations } from '@/lib/data';
+import { trips, tripMembers, getTripMembers, getTripFlights, getTripAccommodations, getTripStatus } from '@/lib/data';
 
 function formatDate(d: string) {
   return new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
@@ -123,8 +123,9 @@ export default function ViagensPage() {
             const members = getTripMembers(trip.id);
             const flightCount = getTripFlights(trip.id).length;
             const hotelCount = getTripAccommodations(trip.id).length;
-            const badge = statusBadge(trip.status);
-            const isCompleted = trip.status === 'completed';
+            const computedStatus = getTripStatus(trip.start_date, trip.end_date);
+            const badge = statusBadge(computedStatus);
+            const isCompleted = computedStatus === 'completed';
 
             return (
               <Link key={trip.id} href={`/viagens/${trip.id}`}>

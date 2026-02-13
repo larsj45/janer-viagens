@@ -41,6 +41,16 @@ export interface Accommodation {
   notes: string;
 }
 
+export function getTripStatus(start_date: string, end_date: string): Trip['status'] {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const start = new Date(start_date + 'T00:00:00');
+  const end = new Date(end_date + 'T23:59:59');
+  if (today > end) return 'completed';
+  if (today >= start && today <= end) return 'active';
+  return 'upcoming';
+}
+
 export const trips: Trip[] = [
   {
     id: '3',
