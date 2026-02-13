@@ -11,7 +11,7 @@ function getAirlineLink(airline: string, confirmationCode?: string): { url: stri
   if (a.includes('delta')) return { url: 'https://www.delta.com/mytrips/', label: 'Delta — Minhas Viagens' };
   if (a.includes('latam')) return { url: 'https://www.latamairlines.com/br/pt/minhas-viagens', label: 'LATAM — Minhas Viagens' };
   if (a.includes('gol')) return { url: 'https://www.voegol.com.br/minhas-viagens', label: 'Gol — Minhas Viagens' };
-  if (a.includes('air europa')) return { url: 'https://www.aireuropa.com/br/pt/minha-reserva', label: 'Air Europa — Minha Reserva' };
+  if (a.includes('air europa')) return { url: 'https://www.aireuropa.com/en/flights/manage-your-booking', label: 'Air Europa — Manage Booking' };
   if (a.includes('qatar')) return { url: 'https://www.qatarairways.com/en/manage-booking.html', label: 'Qatar — Manage Booking' };
   if (a.includes('american')) return { url: 'https://www.aa.com/reservation/view/find-your-trip', label: 'American — Find Your Trip' };
   if (a.includes('azul')) return { url: 'https://www.voeazul.com.br/minhas-viagens', label: 'Azul — Minhas Viagens' };
