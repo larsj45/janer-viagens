@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
+import { Roboto } from "next/font/google";
 import "./globals.css";
+
+const roboto = Roboto({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "700"],
+});
 
 export const metadata: Metadata = {
   title: "Janér Viagens",
@@ -13,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className={`${roboto.className} min-h-screen antialiased`}>{children}</body>
     </html>
   );
 }
