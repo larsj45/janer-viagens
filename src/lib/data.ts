@@ -52,6 +52,15 @@ export const trips: Trip[] = [
     notes: '',
   },
   {
+    id: '5',
+    name: 'Floripa Carnaval — Fev 2026',
+    destination: 'Florianópolis, Brasil',
+    start_date: '2026-02-16',
+    end_date: '2026-02-22',
+    status: 'completed',
+    notes: 'Casa dos sogros em Jurerê',
+  },
+  {
     id: '1',
     name: 'NYC + Austin — Mar 2026',
     destination: 'New York & Austin, EUA',
@@ -78,6 +87,15 @@ export const trips: Trip[] = [
     status: 'planned',
     notes: 'Volta de Antonio e Henrique da Espanha',
   },
+  {
+    id: '6',
+    name: 'China Oxygen Journeys — Mai 2026',
+    destination: 'Beijing → Shanghai → Suzhou → Hong Kong → Shenzhen',
+    start_date: '2026-05-14',
+    end_date: '2026-05-28',
+    status: 'planned',
+    notes: '⚠️ Docs: Visto chinês + Certificado Febre Amarela. Roteiro: Beijing → Shanghai → Suzhou → Hong Kong → Shenzhen',
+  },
 ];
 
 export const tripMembers: TripMember[] = [
@@ -87,6 +105,10 @@ export const tripMembers: TripMember[] = [
   { id: '4', trip_id: '3', member_name: 'Lars', role: 'viajante' },
   { id: '5', trip_id: '4', member_name: 'Antonio', role: 'viajante' },
   { id: '6', trip_id: '4', member_name: 'Henrique', role: 'viajante' },
+  { id: '7', trip_id: '5', member_name: 'Lars', role: 'viajante' },
+  { id: '8', trip_id: '5', member_name: 'Andrea', role: 'viajante' },
+  { id: '9', trip_id: '6', member_name: 'Lars', role: 'viajante' },
+  { id: '10', trip_id: '6', member_name: 'Andrea', role: 'viajante' },
 ];
 
 export const flights: Flight[] = [
@@ -97,6 +119,13 @@ export const flights: Flight[] = [
     origin: 'CGH', destination: 'SDU',
     departure_time: '2026-02-05T10:40', arrival_time: '2026-02-05T11:40',
     confirmation_code: 'UONMKI', cabin_class: '', notes: 'Ida — São Paulo → Rio',
+  },
+  {
+    id: '16', trip_id: '3', member_name: 'Lars',
+    airline: 'Gol', flight_number: 'G31035',
+    origin: 'SDU', destination: 'CGH',
+    departure_time: '2026-02-09T16:35', arrival_time: '2026-02-09T17:40',
+    confirmation_code: 'EQLOWN', cabin_class: '', notes: 'Volta — Rio → São Paulo',
   },
   // Trip 1 — NYC + Austin
   {
@@ -141,6 +170,50 @@ export const flights: Flight[] = [
     origin: 'GRU', destination: 'MAD',
     departure_time: '2026-04-05T13:50', arrival_time: '2026-04-05',
     confirmation_code: '8WX5KD', cabin_class: '', notes: 'NOBAG',
+  },
+  // Trip 5 — Floripa Carnaval
+  {
+    id: '10', trip_id: '5', member_name: 'Lars & Andrea',
+    airline: 'LATAM', flight_number: 'LA3080',
+    origin: 'CGH', destination: 'FLN',
+    departure_time: '2026-02-16T08:30', arrival_time: '2026-02-16T09:40',
+    confirmation_code: 'WEVGPP', cabin_class: '', notes: 'Ida — São Paulo → Floripa',
+  },
+  {
+    id: '11', trip_id: '5', member_name: 'Lars & Andrea',
+    airline: 'Gol', flight_number: 'G31225',
+    origin: 'FLN', destination: 'CGH',
+    departure_time: '2026-02-22T18:35', arrival_time: '2026-02-22T19:55',
+    confirmation_code: 'ABIJQO', cabin_class: '', notes: 'Volta — Floripa → São Paulo',
+  },
+  // Trip 6 — China Oxygen
+  {
+    id: '12', trip_id: '6', member_name: 'Lars & Andrea',
+    airline: 'Qatar Airways', flight_number: 'QR774',
+    origin: 'GRU', destination: 'DOH',
+    departure_time: '2026-05-14T01:20', arrival_time: '2026-05-14T21:40',
+    confirmation_code: '8SWPLH / 8SOHUX', cabin_class: 'Business', notes: 'Ida — São Paulo → Doha',
+  },
+  {
+    id: '13', trip_id: '6', member_name: 'Lars & Andrea',
+    airline: 'Qatar Airways', flight_number: 'QR892',
+    origin: 'DOH', destination: 'PKX',
+    departure_time: '2026-05-15T02:10', arrival_time: '2026-05-15T15:00',
+    confirmation_code: '8SWPLH / 8SOHUX', cabin_class: 'Business', notes: 'Doha → Beijing',
+  },
+  {
+    id: '14', trip_id: '6', member_name: 'Lars & Andrea',
+    airline: 'Qatar Airways', flight_number: 'QR815',
+    origin: 'HKG', destination: 'DOH',
+    departure_time: '2026-05-28T00:55', arrival_time: '2026-05-28T04:05',
+    confirmation_code: '8SWPLH / 8SOHUX', cabin_class: 'Business', notes: 'Hong Kong → Doha',
+  },
+  {
+    id: '15', trip_id: '6', member_name: 'Lars & Andrea',
+    airline: 'Qatar Airways', flight_number: 'QR773',
+    origin: 'DOH', destination: 'GRU',
+    departure_time: '2026-05-28T07:45', arrival_time: '2026-05-28T16:25',
+    confirmation_code: '8SWPLH / 8SOHUX', cabin_class: 'Business', notes: 'Volta — Doha → São Paulo',
   },
   // Trip 4 — Madrid → SP
   {
@@ -189,6 +262,14 @@ export const accommodations: Accommodation[] = [
     address: 'New York, NY',
     check_in: '2026-03-18', check_out: '2026-03-23',
     confirmation_code: '6694665376', notes: 'Segunda estadia NYC (pós-Austin)',
+  },
+  // Trip 5 — Floripa
+  {
+    id: '5', trip_id: '5',
+    name: 'Casa dos Sogros',
+    address: 'Jurerê, Florianópolis',
+    check_in: '2026-02-16', check_out: '2026-02-22',
+    confirmation_code: '', notes: 'Casa da família',
   },
 ];
 
