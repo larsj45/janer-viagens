@@ -161,7 +161,7 @@ export default function ViagensPage() {
 
                   <div className="flex gap-4 mt-3 text-xs text-gray-400">
                     <span>✈️ {flightCount} voo{flightCount !== 1 ? 's' : ''}</span>
-                    <span>🏨 {hotelCount} hotel{hotelCount !== 1 ? 'éis' : ''}</span>
+                    <span>🏨 {hotelCount} {hotelCount !== 1 ? "hotéis" : "hotel"}</span>
                   </div>
                 </div>
               </Link>
