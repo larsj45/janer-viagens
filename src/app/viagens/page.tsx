@@ -67,7 +67,7 @@ export default function ViagensPage() {
       {/* Header */}
       <header className="bg-[var(--color-navy)] text-white">
         <div className="max-w-4xl mx-auto px-4 py-6">
-          <h1 className="text-2xl font-bold">✈️ Janér Viagens</h1>
+          <h1 className="text-2xl font-bold">✈️ Viagens da Família</h1>
           <p className="text-blue-200 text-sm mt-1">Nossas próximas aventuras</p>
         </div>
       </header>
