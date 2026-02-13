@@ -57,7 +57,7 @@ export const trips: Trip[] = [
     destination: 'Florianópolis, Brasil',
     start_date: '2026-02-16',
     end_date: '2026-02-22',
-    status: 'completed',
+    status: 'upcoming',
     notes: 'Casa dos sogros em Jurerê',
   },
   {
