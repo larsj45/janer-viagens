@@ -6,6 +6,18 @@ function formatDate(d: string) {
   return new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+function getAirlineLink(airline: string, confirmationCode?: string): { url: string; label: string } | null {
+  const a = airline.toLowerCase();
+  if (a.includes('delta')) return { url: 'https://www.delta.com/mytrips/', label: 'Delta — Minhas Viagens' };
+  if (a.includes('latam')) return { url: 'https://www.latamairlines.com/br/pt/minhas-viagens', label: 'LATAM — Minhas Viagens' };
+  if (a.includes('gol')) return { url: 'https://www.voegol.com.br/minhas-viagens', label: 'Gol — Minhas Viagens' };
+  if (a.includes('air europa')) return { url: 'https://www.aireuropa.com/br/pt/minha-reserva', label: 'Air Europa — Minha Reserva' };
+  if (a.includes('qatar')) return { url: 'https://www.qatarairways.com/en/manage-booking.html', label: 'Qatar — Manage Booking' };
+  if (a.includes('american')) return { url: 'https://www.aa.com/reservation/view/find-your-trip', label: 'American — Find Your Trip' };
+  if (a.includes('azul')) return { url: 'https://www.voeazul.com.br/minhas-viagens', label: 'Azul — Minhas Viagens' };
+  return null;
+}
+
 function formatDateTime(d: string) {
   if (d.includes('T')) {
     const dt = new Date(d);
@@ -78,7 +90,22 @@ export default async function TripDetailPage({ params }: { params: Promise<{ id:
                 {f.notes && (
                   <p className="text-xs text-gray-400 mt-2">{f.notes}</p>
                 )}
-                <p className="text-xs text-gray-400 mt-1">👤 {f.member_name}</p>
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-xs text-gray-400">👤 {f.member_name}</p>
+                  {(() => {
+                    const link = getAirlineLink(f.airline, f.confirmation_code);
+                    return link ? (
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs bg-[var(--color-accent)] hover:bg-[var(--color-accent-light)] text-[var(--color-navy-dark)] font-medium px-3 py-1 rounded-lg transition-colors"
+                      >
+                        🔗 {link.label}
+                      </a>
+                    ) : null;
+                  })()}
+                </div>
               </div>
             ))}
           </div>
