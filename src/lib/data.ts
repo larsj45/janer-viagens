@@ -305,7 +305,7 @@ export const accommodations: Accommodation[] = [
     address: 'Austin, TX',
     check_in: '2026-03-10', check_out: '2026-03-18',
     confirmation_code: 'Lars Janer (Final)',
-    notes: 'King Bed - City View · SXSW Innovation Badge 2026 · $5,690.20',
+    notes: 'King Bed - City View · SXSW Innovation Badge 2026',
   },
   // Trip 5 — Floripa
   {
