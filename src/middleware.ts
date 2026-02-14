@@ -19,13 +19,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/viagens', request.url));
   }
 
-  // Rewrite /viagens/PERSON to /viagens?pessoa=PERSON for known names
+  // Redirect /viagens/PERSON to /viagens?pessoa=PERSON for known names
   const personNames = ['lars', 'andrea', 'laura', 'antonio', 'henrique'];
   const match = request.nextUrl.pathname.match(/^\/viagens\/([a-zA-Z]+)$/);
   if (match && personNames.includes(match[1].toLowerCase())) {
     const url = new URL('/viagens', request.url);
     url.searchParams.set('pessoa', match[1].toLowerCase());
-    return NextResponse.rewrite(url);
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();
