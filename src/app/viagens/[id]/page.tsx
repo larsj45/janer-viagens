@@ -1,6 +1,8 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getTrip, getTripMembers, getTripFlights, getTripAccommodations } from '@/lib/data';
+
+const PEOPLE = ['lars', 'andrea', 'laura', 'antonio', 'henrique'];
 
 function formatDate(d: string) {
   return new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -28,6 +30,12 @@ function formatDateTime(d: string) {
 
 export default async function TripDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  
+  // Support /viagens/laura, /viagens/andrea, etc. → redirect to filtered list
+  if (PEOPLE.includes(id.toLowerCase())) {
+    redirect(`/viagens?pessoa=${id.toLowerCase()}`);
+  }
+  
   const trip = getTrip(id);
   if (!trip) notFound();
 
