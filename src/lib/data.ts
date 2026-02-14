@@ -98,6 +98,15 @@ export const trips: Trip[] = [
     notes: 'Volta de Antonio e Henrique da Espanha',
   },
   {
+    id: '7',
+    name: 'Laura em SP — Abr 2026',
+    destination: 'São Paulo, Brasil',
+    start_date: '2026-04-03',
+    end_date: '2026-04-15',
+    status: 'upcoming',
+    notes: 'Delta direto JFK↔GRU. Confirmação: JKZVAP. eTicket: #0062404938031',
+  },
+  {
     id: '6',
     name: 'China Oxygen Journeys — Mai 2026',
     destination: 'Beijing → Shanghai → Suzhou → Hong Kong → Shenzhen',
@@ -117,6 +126,7 @@ export const tripMembers: TripMember[] = [
   { id: '6', trip_id: '4', member_name: 'Henrique', role: 'viajante' },
   { id: '7', trip_id: '5', member_name: 'Lars', role: 'viajante' },
   { id: '8', trip_id: '5', member_name: 'Andrea', role: 'viajante' },
+  { id: '11', trip_id: '7', member_name: 'Laura', role: 'viajante' },
   { id: '9', trip_id: '6', member_name: 'Lars', role: 'viajante' },
   { id: '10', trip_id: '6', member_name: 'Andrea', role: 'viajante' },
 ];
@@ -180,6 +190,21 @@ export const flights: Flight[] = [
     origin: 'GRU', destination: 'MAD',
     departure_time: '2026-04-05T13:50', arrival_time: '2026-04-05',
     confirmation_code: '8WX5KD', cabin_class: '', notes: 'NOBAG',
+  },
+  // Trip 7 — Laura em SP
+  {
+    id: '17', trip_id: '7', member_name: 'Laura',
+    airline: 'Delta', flight_number: 'DL0227',
+    origin: 'JFK', destination: 'GRU',
+    departure_time: '2026-04-03T21:50', arrival_time: '2026-04-04T08:50',
+    confirmation_code: 'JKZVAP', cabin_class: 'Main Classic (T)', notes: 'Nonstop · A330-900neo · Seat 50A · Terminal 4→3',
+  },
+  {
+    id: '18', trip_id: '7', member_name: 'Laura',
+    airline: 'Delta', flight_number: 'DL0226',
+    origin: 'GRU', destination: 'JFK',
+    departure_time: '2026-04-15T20:35', arrival_time: '2026-04-16T05:28',
+    confirmation_code: 'JKZVAP', cabin_class: 'Main Classic (T)', notes: 'Nonstop · A330-900neo · Seat 50A · Terminal 3→4',
   },
   // Trip 5 — Floripa Carnaval
   {
