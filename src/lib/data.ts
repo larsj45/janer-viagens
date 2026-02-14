@@ -298,6 +298,15 @@ export const accommodations: Accommodation[] = [
     check_in: '2026-03-18', check_out: '2026-03-23',
     confirmation_code: '6694665376', notes: 'Segunda estadia NYC (pós-Austin)',
   },
+  // Trip 1 — Austin (SXSW)
+  {
+    id: '6', trip_id: '1',
+    name: 'Thompson Austin',
+    address: 'Austin, TX',
+    check_in: '2026-03-10', check_out: '2026-03-18',
+    confirmation_code: 'Lars Janer (Final)',
+    notes: 'King Bed - City View · SXSW Innovation Badge 2026 · $5,690.20',
+  },
   // Trip 5 — Floripa
   {
     id: '5', trip_id: '5',
