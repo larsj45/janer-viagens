@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { trips, tripMembers, getTripMembers, getTripFlights, getTripAccommodations, getTripStatus } from '@/lib/data';
 
@@ -41,9 +42,23 @@ function statusBadge(status: string) {
   }
 }
 
-export default function ViagensPage() {
-  const [personFilter, setPersonFilter] = useState('Todos');
+function ViagensContent() {
+  const searchParams = useSearchParams();
+  const pessoaParam = searchParams.get('pessoa');
+  
+  const initialPerson = pessoaParam 
+    ? PEOPLE.find(p => p.toLowerCase() === pessoaParam.toLowerCase()) || 'Todos'
+    : 'Todos';
+  
+  const [personFilter, setPersonFilter] = useState(initialPerson);
   const [monthFilter, setMonthFilter] = useState('all');
+  
+  useEffect(() => {
+    if (pessoaParam) {
+      const match = PEOPLE.find(p => p.toLowerCase() === pessoaParam.toLowerCase());
+      if (match) setPersonFilter(match);
+    }
+  }, [pessoaParam]);
 
   const filtered = trips.filter(trip => {
     // Person filter
@@ -174,5 +189,13 @@ export default function ViagensPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function ViagensPage() {
+  return (
+    <Suspense>
+      <ViagensContent />
+    </Suspense>
   );
 }
