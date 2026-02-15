@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { getTrip, getTripMembers, getTripFlights, getTripAccommodations } from '@/lib/data';
 
+export const dynamic = 'force-dynamic';
+
 const PEOPLE = ['lars', 'andrea', 'laura', 'antonio', 'henrique'];
 
 function formatDate(d: string) {
@@ -36,12 +38,14 @@ export default async function TripDetailPage({ params }: { params: Promise<{ id:
     redirect(`/viagens?pessoa=${id.toLowerCase()}`);
   }
   
-  const trip = getTrip(id);
+  const trip = await getTrip(id);
   if (!trip) notFound();
 
-  const members = getTripMembers(id);
-  const tripFlights = getTripFlights(id);
-  const hotels = getTripAccommodations(id);
+  const [members, tripFlights, hotels] = await Promise.all([
+    getTripMembers(id),
+    getTripFlights(id),
+    getTripAccommodations(id),
+  ]);
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
