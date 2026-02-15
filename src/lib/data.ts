@@ -191,6 +191,14 @@ export const flights: Flight[] = [
     departure_time: '2026-04-05T13:50', arrival_time: '2026-04-05',
     confirmation_code: '8WX5KD', cabin_class: '', notes: 'NOBAG',
   },
+  // Trip 2 — Henrique CGH→FLN (Páscoa)
+  {
+    id: '19', trip_id: '2', member_name: 'Henrique',
+    airline: 'LATAM', flight_number: 'LA4620',
+    origin: 'CGH', destination: 'FLN',
+    departure_time: '2026-03-29T19:20', arrival_time: '2026-03-29T20:35',
+    confirmation_code: 'JDDPTO', cabin_class: 'Economy Standard', notes: 'SP→Floripa · LATAM Flex 2 dias',
+  },
   // Trip 7 — Laura em SP
   {
     id: '17', trip_id: '7', member_name: 'Laura',
