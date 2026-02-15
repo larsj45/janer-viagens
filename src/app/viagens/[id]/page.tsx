@@ -24,8 +24,13 @@ function getAirlineLink(airline: string, confirmationCode?: string): { url: stri
 
 function formatDateTime(d: string) {
   if (d.includes('T')) {
-    const dt = new Date(d);
-    return dt.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', timeZone: 'America/Sao_Paulo' }) + ' ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
+    // Strip timezone offset — flight times are always local to departure airport
+    const local = d.replace(/[+-]\d{2}:\d{2}$/, '').replace(/Z$/, '');
+    const [datePart, timePart] = local.split('T');
+    const [year, month, day] = datePart.split('-').map(Number);
+    const [hour, minute] = timePart.split(':').map(Number);
+    const monthName = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][month - 1];
+    return `${day} de ${monthName} ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
   }
   return formatDate(d);
 }
