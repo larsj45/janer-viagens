@@ -25,7 +25,7 @@ function getAirlineLink(airline: string, confirmationCode?: string): { url: stri
 function formatDateTime(d: string) {
   if (d.includes('T')) {
     const dt = new Date(d);
-    return dt.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' }) + ' ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return dt.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', timeZone: 'America/Sao_Paulo' }) + ' ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
   }
   return formatDate(d);
 }
