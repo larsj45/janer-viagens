@@ -1,5 +1,5 @@
-import FamilyTree from './FamilyTree';
+import FamilyTreeElegant from './FamilyTreeElegant';
 
 export default function ArvoreGenealogica() {
-  return <FamilyTree />;
+  return <FamilyTreeElegant />;
 }
