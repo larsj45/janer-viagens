@@ -3,70 +3,83 @@
 import { useState, useRef, useEffect } from 'react';
 import { getPerson, getParents, getChildren, getSpouses, type Person, familyData } from './data';
 
-interface TreeNode {
-  person: Person;
+interface NodePosition {
   x: number;
   y: number;
-  level: number;
-  expanded: boolean;
 }
 
+interface Link {
+  from: string;
+  to: string;
+}
+
+const CARD_W = 160;
+const CARD_H = 90;
+const GEN_GAP = 180;
+const H_GAP = 20;
+
 export default function FamilyTreeElegant() {
-  const [focusPersonId, setFocusPersonId] = useState('lars');
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showSearch, setShowSearch] = useState(false);
-  const [scale, setScale] = useState(0.8);
-  const [translateX, setTranslateX] = useState(200);
-  const [translateY, setTranslateY] = useState(100);
+  const [scale, setScale] = useState(0.7);
+  const [translateX, setTranslateX] = useState(400);
+  const [translateY, setTranslateY] = useState(400);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(['lars', 'tor', 'edina', 'andrea']));
-  
+  const [visibleNodes, setVisibleNodes] = useState<Set<string>>(
+    new Set(['lars', 'andrea', 'laura', 'antonio', 'henrique', 'tor', 'edina'])
+  );
+  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(
+    new Set(['lars_parents', 'andrea_parents'])
+  );
+
   const svgRef = useRef<SVGSVGElement>(null);
 
-  // Buscar pessoas
   const searchResults = searchTerm 
-    ? familyData.filter(p => 
-        p.name.toLowerCase().includes(searchTerm.toLowerCase())
-      ).slice(0, 8)
+    ? familyData.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())).slice(0, 8)
     : [];
 
   const zoomIn = () => setScale(s => Math.min(s * 1.2, 3));
   const zoomOut = () => setScale(s => Math.max(s / 1.2, 0.3));
   const resetView = () => {
-    setScale(0.8);
-    setTranslateX(200);
-    setTranslateY(100);
-    setFocusPersonId('lars');
+    setScale(0.7);
+    setTranslateX(400);
+    setTranslateY(400);
   };
 
   const expandAll = () => {
     const allIds = new Set(familyData.map(p => p.id));
-    setExpandedNodes(allIds);
+    setVisibleNodes(allIds);
   };
 
   const collapseAll = () => {
-    setExpandedNodes(new Set(['lars']));
+    setVisibleNodes(new Set(['lars', 'andrea', 'laura', 'antonio', 'henrique']));
+    setExpandedKeys(new Set());
   };
 
   const toggleExpand = (personId: string, direction: 'up' | 'down') => {
-    const newExpanded = new Set(expandedNodes);
     const person = getPerson(personId);
     if (!person) return;
 
+    const key = `${personId}_${direction === 'up' ? 'parents' : 'children'}`;
+    const newExpanded = new Set(expandedKeys);
+    const newVisible = new Set(visibleNodes);
+
     if (direction === 'up') {
       const parents = getParents(personId);
-      parents.forEach(p => newExpanded.add(p.id));
+      parents.forEach(p => newVisible.add(p.id));
+      newExpanded.add(key);
     } else {
       const children = getChildren(personId);
-      children.forEach(c => newExpanded.add(c.id));
+      children.forEach(c => newVisible.add(c.id));
+      newExpanded.add(key);
     }
-    
-    setExpandedNodes(newExpanded);
+
+    setExpandedKeys(newExpanded);
+    setVisibleNodes(newVisible);
   };
 
-  // Mouse drag
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     setDragStart({ x: e.clientX - translateX, y: e.clientY - translateY });
@@ -80,103 +93,145 @@ export default function FamilyTreeElegant() {
 
   const handleMouseUp = () => setIsDragging(false);
 
-  // Construir árvore recursiva
-  const buildTree = (personId: string, level: number, x: number, visited: Set<string> = new Set()): TreeNode[] => {
-    const person = getPerson(personId);
-    if (!person || visited.has(personId)) return [];
-
-    visited.add(personId);
-
-    const nodes: TreeNode[] = [];
-    const isExpanded = expandedNodes.has(personId);
+  // Compute layout using BFS from Lars
+  const computeLayout = (): { positions: Record<string, NodePosition>, links: Link[] } => {
+    const positions: Record<string, NodePosition> = {};
+    const links: Link[] = [];
     
-    nodes.push({
-      person,
-      x,
-      y: level * 180 + 100,
-      level,
-      expanded: isExpanded,
+    if (visibleNodes.size === 0) return { positions, links };
+
+    // BFS to assign generations
+    const gens: Record<string, number> = {};
+    const queue: Array<[string, number]> = [['lars', 0]];
+    const visited = new Set<string>();
+
+    while (queue.length > 0) {
+      const item = queue.shift();
+      if (!item) continue;
+      const [pid, gen] = item;
+      
+      if (visited.has(pid)) continue;
+      if (!visibleNodes.has(pid)) continue;
+      
+      visited.add(pid);
+      gens[pid] = gen;
+
+      // Spouses = same generation
+      const spouses = getSpouses(pid).filter(s => visibleNodes.has(s.id));
+      spouses.forEach(s => {
+        if (!visited.has(s.id)) queue.push([s.id, gen]);
+      });
+
+      // Children = gen + 1
+      const children = getChildren(pid).filter(c => visibleNodes.has(c.id));
+      children.forEach(c => {
+        if (!visited.has(c.id)) queue.push([c.id, gen + 1]);
+      });
+
+      // Parents = gen - 1
+      const parents = getParents(pid).filter(p => visibleNodes.has(p.id));
+      parents.forEach(p => {
+        if (!visited.has(p.id)) queue.push([p.id, gen - 1]);
+      });
+    }
+
+    // Group by generation
+    const genGroups: Record<number, string[]> = {};
+    Object.entries(gens).forEach(([pid, gen]) => {
+      if (!genGroups[gen]) genGroups[gen] = [];
+      genGroups[gen].push(pid);
     });
 
-    if (!isExpanded) return nodes;
+    // Order within each generation (keep couples together)
+    Object.keys(genGroups).forEach(genKey => {
+      const gen = Number(genKey);
+      const group = genGroups[gen];
+      const ordered: string[] = [];
+      const used = new Set<string>();
 
-    // Parents
-    const parents = getParents(personId);
-    if (parents.length > 0) {
-      const parentY = level - 1;
-      const parentSpacing = 200;
-      const parentX = x - (parents.length - 1) * parentSpacing / 2;
-      parents.forEach((parent, idx) => {
-        nodes.push(...buildTree(parent.id, parentY, parentX + idx * parentSpacing, visited));
+      group.forEach(pid => {
+        if (used.has(pid)) return;
+        used.add(pid);
+        ordered.push(pid);
+
+        // Add spouse next to them
+        const spouses = getSpouses(pid).filter(s => group.includes(s.id) && !used.has(s.id));
+        spouses.forEach(s => {
+          used.add(s.id);
+          ordered.push(s.id);
+        });
       });
-    }
 
-    // Children
-    const children = getChildren(personId);
-    if (children.length > 0) {
-      const childY = level + 1;
-      const childSpacing = 180;
-      const childX = x - (children.length - 1) * childSpacing / 2;
-      children.forEach((child, idx) => {
-        nodes.push(...buildTree(child.id, childY, childX + idx * childSpacing, visited));
+      genGroups[gen] = ordered;
+    });
+
+    // Position nodes
+    const sortedGens = Object.keys(genGroups).map(Number).sort((a, b) => a - b);
+
+    sortedGens.forEach(gen => {
+      const group = genGroups[gen];
+      const y = gen * (CARD_H + GEN_GAP);
+      const totalW = group.length * CARD_W + (group.length - 1) * H_GAP;
+      let x = -totalW / 2;
+
+      group.forEach(pid => {
+        positions[pid] = { x, y };
+        x += CARD_W + H_GAP;
       });
-    }
+    });
 
-    // Spouse
-    const spouses = getSpouses(personId);
-    if (spouses.length > 0) {
-      spouses.forEach(spouse => {
-        if (!visited.has(spouse.id)) {
-          nodes.push(...buildTree(spouse.id, level, x + 200, visited));
-        }
+    // Generate links
+    visibleNodes.forEach(pid => {
+      const parents = getParents(pid).filter(p => visibleNodes.has(p.id));
+      parents.forEach(p => {
+        links.push({ from: p.id, to: pid });
       });
-    }
+    });
 
-    return nodes;
+    return { positions, links };
   };
 
-  const tree = buildTree(focusPersonId, 2, 600);
-  const uniqueTree = Array.from(new Map(tree.map(n => [n.person.id, n])).values());
+  const { positions, links } = computeLayout();
 
-  const renderPersonCard = (node: TreeNode) => {
-    const person = node.person;
-    const w = 160;
-    const h = 90;
+  const renderPersonCard = (personId: string) => {
+    const person = getPerson(personId);
+    const pos = positions[personId];
+    if (!person || !pos) return null;
+
     const isDark = person.gender === 'M';
-    const hasParents = getParents(person.id).length > 0;
-    const hasChildren = getChildren(person.id).length > 0;
+    const hasParents = getParents(personId).some(p => !visibleNodes.has(p.id));
+    const hasChildren = getChildren(personId).some(c => !visibleNodes.has(c.id));
 
     return (
-      <g key={person.id} transform={`translate(${node.x},${node.y})`} className="node-group">
+      <g key={personId} transform={`translate(${pos.x},${pos.y})`} className="node-group">
         {/* Card */}
         <rect
-          x={-w/2}
-          y={-h/2}
-          width={w}
-          height={h}
+          x={0}
+          y={0}
+          width={CARD_W}
+          height={CARD_H}
           rx={8}
           fill={isDark ? '#3a6d96' : '#9b5d8e'}
           stroke="#d4a853"
           strokeWidth={2}
-          className="node-card cursor-pointer"
-          onClick={() => setFocusPersonId(person.id)}
+          className="cursor-pointer transition-all hover:brightness-125"
         />
-        
+
         {/* Connection circles */}
-        {hasParents && (
+        {(hasParents || getParents(personId).length > 0) && (
           <circle
-            cx={0}
-            cy={-h/2}
+            cx={CARD_W / 2}
+            cy={0}
             r={6}
             fill="#8b6914"
             stroke="#2b2520"
             strokeWidth={1}
           />
         )}
-        {hasChildren && (
+        {(hasChildren || getChildren(personId).length > 0) && (
           <circle
-            cx={0}
-            cy={h/2}
+            cx={CARD_W / 2}
+            cy={CARD_H}
             r={6}
             fill="#8b6914"
             stroke="#2b2520"
@@ -185,19 +240,14 @@ export default function FamilyTreeElegant() {
         )}
 
         {/* Flag */}
-        <text
-          x={-w/2 + 12}
-          y={-h/2 + 22}
-          fontSize="18"
-          className="select-none"
-        >
+        <text x={12} y={22} fontSize="18" className="select-none">
           🇧🇷
         </text>
 
         {/* Name */}
         <text
-          x={0}
-          y={-10}
+          x={CARD_W / 2}
+          y={35}
           textAnchor="middle"
           fontSize="13"
           fontWeight="600"
@@ -207,8 +257,8 @@ export default function FamilyTreeElegant() {
           {person.name.split(' ')[0]}
         </text>
         <text
-          x={0}
-          y={6}
+          x={CARD_W / 2}
+          y={50}
           textAnchor="middle"
           fontSize="11"
           fill="rgba(255,255,255,0.9)"
@@ -219,8 +269,8 @@ export default function FamilyTreeElegant() {
 
         {/* Birth */}
         <text
-          x={0}
-          y={24}
+          x={CARD_W / 2}
+          y={68}
           textAnchor="middle"
           fontSize="10"
           fill="rgba(255,255,255,0.7)"
@@ -232,28 +282,28 @@ export default function FamilyTreeElegant() {
         {/* Expand buttons */}
         {hasParents && (
           <g
-            className="expand-btn cursor-pointer"
+            className="cursor-pointer opacity-80 hover:opacity-100"
             onClick={(e) => {
               e.stopPropagation();
-              toggleExpand(person.id, 'up');
+              toggleExpand(personId, 'up');
             }}
           >
-            <circle cx={w/2 - 16} cy={-h/2 + 12} r={8} fill="rgba(139,105,20,0.8)" />
-            <text x={w/2 - 16} y={-h/2 + 16} textAnchor="middle" fontSize="10" fill="white" className="pointer-events-none">
+            <circle cx={CARD_W - 16} cy={12} r={8} fill="rgba(139,105,20,0.8)" />
+            <text x={CARD_W - 16} y={16} textAnchor="middle" fontSize="10" fill="white" className="pointer-events-none">
               ↑
             </text>
           </g>
         )}
         {hasChildren && (
           <g
-            className="expand-btn cursor-pointer"
+            className="cursor-pointer opacity-80 hover:opacity-100"
             onClick={(e) => {
               e.stopPropagation();
-              toggleExpand(person.id, 'down');
+              toggleExpand(personId, 'down');
             }}
           >
-            <circle cx={w/2 - 16} cy={h/2 - 12} r={8} fill="rgba(139,105,20,0.8)" />
-            <text x={w/2 - 16} y={h/2 - 8} textAnchor="middle" fontSize="10" fill="white" className="pointer-events-none">
+            <circle cx={CARD_W - 16} cy={CARD_H - 12} r={8} fill="rgba(139,105,20,0.8)" />
+            <text x={CARD_W - 16} y={CARD_H - 8} textAnchor="middle" fontSize="10" fill="white" className="pointer-events-none">
               ↓
             </text>
           </g>
@@ -261,14 +311,14 @@ export default function FamilyTreeElegant() {
 
         {/* Info button */}
         <g
-          className="expand-btn cursor-pointer"
+          className="cursor-pointer opacity-80 hover:opacity-100"
           onClick={(e) => {
             e.stopPropagation();
             setSelectedPerson(person);
           }}
         >
-          <circle cx={-w/2 + 16} cy={h/2 - 12} r={8} fill="rgba(139,105,20,0.8)" />
-          <text x={-w/2 + 16} y={h/2 - 8} textAnchor="middle" fontSize="10" fill="white" fontWeight="bold" className="pointer-events-none">
+          <circle cx={16} cy={CARD_H - 12} r={8} fill="rgba(139,105,20,0.8)" />
+          <text x={16} y={CARD_H - 8} textAnchor="middle" fontSize="10" fill="white" fontWeight="bold" className="pointer-events-none">
             i
           </text>
         </g>
@@ -277,27 +327,23 @@ export default function FamilyTreeElegant() {
   };
 
   const renderLines = () => {
-    const lines: React.ReactElement[] = [];
-    uniqueTree.forEach(node => {
-      const parents = getParents(node.person.id);
-      parents.forEach(parent => {
-        const parentNode = uniqueTree.find(n => n.person.id === parent.id);
-        if (parentNode) {
-          lines.push(
-            <line
-              key={`${node.person.id}-${parent.id}`}
-              x1={parentNode.x}
-              y1={parentNode.y + 45}
-              x2={node.x}
-              y2={node.y - 45}
-              stroke="#333"
-              strokeWidth={1.5}
-            />
-          );
-        }
-      });
+    return links.map((link, idx) => {
+      const fromPos = positions[link.from];
+      const toPos = positions[link.to];
+      if (!fromPos || !toPos) return null;
+
+      return (
+        <line
+          key={`${link.from}-${link.to}-${idx}`}
+          x1={fromPos.x + CARD_W / 2}
+          y1={fromPos.y + CARD_H}
+          x2={toPos.x + CARD_W / 2}
+          y2={toPos.y}
+          stroke="#333"
+          strokeWidth={1.5}
+        />
+      );
     });
-    return lines;
   };
 
   return (
@@ -335,7 +381,7 @@ export default function FamilyTreeElegant() {
           <h1 className="text-[#f0d080] text-2xl font-bold whitespace-nowrap">
             🌳 Família Janér-Melegari
           </h1>
-          
+
           {/* Search */}
           <div className="relative flex-1 max-w-md">
             <input
@@ -347,6 +393,7 @@ export default function FamilyTreeElegant() {
                 setShowSearch(true);
               }}
               onFocus={() => setShowSearch(true)}
+              onBlur={() => setTimeout(() => setShowSearch(false), 200)}
               className="w-full px-4 py-2 rounded-full border border-[#d5cdbf] bg-[#f5f0e8] outline-none"
             />
             {showSearch && searchResults.length > 0 && (
@@ -355,7 +402,9 @@ export default function FamilyTreeElegant() {
                   <div
                     key={person.id}
                     onClick={() => {
-                      setFocusPersonId(person.id);
+                      const newVisible = new Set(visibleNodes);
+                      newVisible.add(person.id);
+                      setVisibleNodes(newVisible);
                       setSearchTerm('');
                       setShowSearch(false);
                     }}
@@ -387,14 +436,10 @@ export default function FamilyTreeElegant() {
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
         >
-          <svg
-            ref={svgRef}
-            className="w-full h-full"
-            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
-          >
+          <svg ref={svgRef} className="w-full h-full">
             <g transform={`translate(${translateX},${translateY}) scale(${scale})`}>
               {renderLines()}
-              {uniqueTree.map(renderPersonCard)}
+              {Array.from(visibleNodes).map(renderPersonCard)}
             </g>
           </svg>
 
@@ -414,7 +459,7 @@ export default function FamilyTreeElegant() {
             </div>
             <div className="text-[10px]">
               Clique ↑↓ para expandir<br/>
-              Clique no nome para focar
+              Clique no (i) para detalhes
             </div>
           </div>
         </div>
