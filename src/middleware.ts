@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
   }
 
   if (isLoginPage) {
-    return NextResponse.redirect(new URL('/viagens', request.url));
+    return NextResponse.redirect(new URL('/', request.url));
   }
 
   // Redirect /viagens/PERSON to /viagens?pessoa=PERSON for known names
