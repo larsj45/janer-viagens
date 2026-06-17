@@ -127,3 +127,25 @@ INSERT INTO accommodations (trip_id, name, address, check_in, check_out, confirm
   ('00000000-0000-0000-0000-000000000001', 'AKA NoMad', 'New York, NY', '2026-03-18', '2026-03-23', '6694665376', 'Segunda estadia NYC (pós-Austin)'),
   ('00000000-0000-0000-0000-000000000001', 'Thompson Austin', 'Austin, TX', '2026-03-10', '2026-03-18', 'Lars Janer (Final)', 'King Bed - City View · SXSW Innovation Badge 2026'),
   ('00000000-0000-0000-0000-000000000005', 'Casa dos Sogros', 'Jurerê, Florianópolis', '2026-02-16', '2026-02-22', '', 'Casa da família');
+
+-- ============================================================
+-- LOYALTY ACCOUNTS (programas de milhagem)
+-- GATED: RLS on, NO public-read policy. Only service_role (server-side) reads.
+-- Served via the login-gated /viagens/milhas server component.
+-- ============================================================
+DROP TABLE IF EXISTS loyalty_accounts CASCADE;
+CREATE TABLE loyalty_accounts (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  member_name TEXT NOT NULL,
+  program TEXT NOT NULL,
+  category TEXT NOT NULL DEFAULT 'aerea' CHECK (category IN ('aerea','hotel','locadora','pontos')),
+  account_number TEXT DEFAULT '',
+  tier TEXT DEFAULT '',
+  login TEXT DEFAULT '',
+  notes TEXT DEFAULT '',
+  sort_order INT DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+ALTER TABLE loyalty_accounts ENABLE ROW LEVEL SECURITY;
+-- No SELECT policy on purpose: anon key must never read loyalty numbers.
+-- Seed data lives in Supabase (inserted 2026-06-17); see travel/milhas-programas.md in the vault.

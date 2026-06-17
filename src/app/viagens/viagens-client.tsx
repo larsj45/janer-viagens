@@ -89,9 +89,14 @@ function ViagensContent({ trips, allMembers, extrasMap }: Props) {
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">✈️ Viagens da Família</h1>
-            <Link href="/viagens/calendario" className="flex items-center gap-1.5 rounded-lg bg-white/15 px-3 py-1.5 text-sm font-medium text-white hover:bg-white/25 transition-colors">
-              📅 Calendário
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link href="/viagens/milhas" className="flex items-center gap-1.5 rounded-lg bg-white/15 px-3 py-1.5 text-sm font-medium text-white hover:bg-white/25 transition-colors">
+                🎟️ Milhas
+              </Link>
+              <Link href="/viagens/calendario" className="flex items-center gap-1.5 rounded-lg bg-white/15 px-3 py-1.5 text-sm font-medium text-white hover:bg-white/25 transition-colors">
+                📅 Calendário
+              </Link>
+            </div>
           </div>
         </div>
       </header>
