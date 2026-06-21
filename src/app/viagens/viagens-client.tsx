@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import type { Trip, TripMember } from '@/lib/data';
@@ -39,20 +39,17 @@ function ViagensContent({ trips, allMembers, extrasMap }: Props) {
   const searchParams = useSearchParams();
   const pessoaParam = searchParams.get('pessoa');
 
-  const initialPerson = pessoaParam
+  const queryPersonFilter = pessoaParam
     ? PEOPLE.find(p => p.toLowerCase() === pessoaParam.toLowerCase()) || 'Todos'
     : 'Todos';
 
-  const [personFilter, setPersonFilter] = useState(initialPerson);
+  const [personOverride, setPersonOverride] = useState<{ pessoaParam: string | null; value: string } | null>(null);
+  const personFilter = personOverride?.pessoaParam === pessoaParam
+    ? personOverride.value
+    : queryPersonFilter;
+  const setPersonFilter = (value: string) => setPersonOverride({ pessoaParam, value });
   const [monthFilter, setMonthFilter] = useState('all');
   const [showPast, setShowPast] = useState(false);
-
-  useEffect(() => {
-    if (pessoaParam) {
-      const match = PEOPLE.find(p => p.toLowerCase() === pessoaParam.toLowerCase());
-      if (match) setPersonFilter(match);
-    }
-  }, [pessoaParam]);
 
   // Build months from trips
   const allMonths = Array.from(new Set(

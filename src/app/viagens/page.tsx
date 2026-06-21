@@ -1,5 +1,4 @@
 import { getAllTrips, getAllTripMembers, getTripFlights, getTripAccommodations, getTripStatus } from '@/lib/data';
-import type { Trip, TripMember } from '@/lib/data';
 import ViagensClient from './viagens-client';
 
 export const dynamic = 'force-dynamic';

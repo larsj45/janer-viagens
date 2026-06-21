@@ -53,7 +53,7 @@ interface Props {
 }
 
 export default function CalendarioClient({ trips, allMembers }: Props) {
-  const today = new Date();
+  const today = useMemo(() => new Date(), []);
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [selectedDay, setSelectedDay] = useState<DayData | null>(null);

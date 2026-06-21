@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { getPerson, getParents, getChildren, getSpouses, type Person, familyData } from './data';
 
 interface NodePosition {

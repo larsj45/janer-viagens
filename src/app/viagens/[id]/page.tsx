@@ -11,7 +11,7 @@ function formatDate(d: string) {
   return new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-function getAirlineLink(airline: string, confirmationCode?: string): { url: string; label: string } | null {
+function getAirlineLink(airline: string): { url: string; label: string } | null {
   const a = airline.toLowerCase();
   if (a.includes('delta')) return { url: 'https://www.delta.com/mytrips/', label: 'Delta — Minhas Viagens' };
   if (a.includes('latam')) return { url: 'https://www.latamairlines.com/br/pt/minhas-viagens', label: 'LATAM — Minhas Viagens' };
@@ -28,7 +28,7 @@ function formatDateTime(d: string) {
     // Strip timezone offset — flight times are always local to departure airport
     const local = d.replace(/[+-]\d{2}:\d{2}$/, '').replace(/Z$/, '');
     const [datePart, timePart] = local.split('T');
-    const [year, month, day] = datePart.split('-').map(Number);
+    const [, month, day] = datePart.split('-').map(Number);
     const [hour, minute] = timePart.split(':').map(Number);
     const monthName = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][month - 1];
     return `${day} de ${monthName} ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
@@ -56,7 +56,7 @@ function isPastFlight(f: Flight): boolean {
 }
 
 function FlightCard({ f }: { f: Flight }) {
-  const link = getAirlineLink(f.airline, f.confirmation_code);
+  const link = getAirlineLink(f.airline);
   return (
     <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
       <div className="flex items-center justify-between mb-2">
