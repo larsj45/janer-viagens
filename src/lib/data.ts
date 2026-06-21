@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { getSupabaseAdmin } from './supabase-admin';
 
 export interface Trip {
   id: string;
@@ -41,6 +42,32 @@ export interface Accommodation {
   check_out: string;
   confirmation_code: string;
   notes: string;
+}
+
+export interface LoyaltyAccount {
+  id: string;
+  member_name: string;
+  program: string;
+  category: 'aerea' | 'hotel' | 'locadora' | 'pontos';
+  account_number: string;
+  tier: string;
+  login: string;
+  notes: string;
+  sort_order: number;
+}
+
+// Server-only: reads via the service_role client because loyalty_accounts has
+// no public-read RLS policy (the anon key cannot see it). Call only from Server
+// Components / the login-gated render.
+export async function getLoyaltyAccounts(): Promise<LoyaltyAccount[]> {
+  const { data, error } = await getSupabaseAdmin()
+    .from('loyalty_accounts')
+    .select('*')
+    .order('sort_order', { ascending: true })
+    .order('category', { ascending: true })
+    .order('program', { ascending: true });
+  if (error) throw error;
+  return data as LoyaltyAccount[];
 }
 
 export function getTripStatus(start_date: string, end_date: string): Trip['status'] {

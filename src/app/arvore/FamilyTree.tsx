@@ -13,12 +13,6 @@ interface TreeNode {
 export default function FamilyTree() {
   const [focusPersonId, setFocusPersonId] = useState('lars');
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-
-  // Buscar pessoas
-  const searchResults = searchTerm ? 
-    (getPerson as any)('lars').constructor.name ? [] : [] // stub
-    : [];
 
   const renderTree = () => {
     const focusPerson = getPerson(focusPersonId);
