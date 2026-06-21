@@ -45,6 +45,7 @@ function ViagensContent({ trips, allMembers, extrasMap }: Props) {
 
   const [personFilter, setPersonFilter] = useState(initialPerson);
   const [monthFilter, setMonthFilter] = useState('all');
+  const [showPast, setShowPast] = useState(false);
 
   useEffect(() => {
     if (pessoaParam) {
@@ -82,6 +83,51 @@ function ViagensContent({ trips, allMembers, extrasMap }: Props) {
     }
     return true;
   });
+
+  const isCompletedTrip = (trip: Trip) =>
+    (extrasMap[trip.id]?.computedStatus ?? 'upcoming') === 'completed';
+  const currentTrips = filtered.filter((t) => !isCompletedTrip(t));
+  const pastTrips = filtered.filter(isCompletedTrip);
+
+  const renderCard = (trip: Trip) => {
+    const members = getMembersForTrip(trip.id);
+    const extras = extrasMap[trip.id] || { flightCount: 0, hotelCount: 0, computedStatus: 'upcoming' };
+    const badge = statusBadge(extras.computedStatus);
+    const isCompleted = extras.computedStatus === 'completed';
+
+    return (
+      <Link key={trip.id} href={`/viagens/${trip.id}`}>
+        <div className={`bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-100 cursor-pointer ${isCompleted ? 'opacity-60' : ''}`}>
+          <div className="flex items-start justify-between mb-3">
+            <h2 className="text-lg font-bold text-[var(--color-navy)]">{trip.name}</h2>
+            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${badge.cls}`}>
+              {badge.label}
+            </span>
+          </div>
+          <p className="text-gray-500 text-sm mb-4">📍 {trip.destination}</p>
+          <p className="text-gray-600 text-sm mb-4">📅 {formatDate(trip.start_date)} — {formatDate(trip.end_date)}</p>
+          <div className="flex gap-2 flex-wrap text-sm text-gray-500">
+            👥{' '}
+            {members.map((m, i) => (
+              <span key={m.id}>
+                <button
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPersonFilter(m.member_name); }}
+                  className="text-[var(--color-navy)] hover:underline font-medium"
+                >
+                  {m.member_name}
+                </button>
+                {i < members.length - 1 ? ', ' : ''}
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-4 mt-3 text-xs text-gray-400">
+            <span>✈️ {extras.flightCount} voo{extras.flightCount !== 1 ? 's' : ''}</span>
+            <span>🏨 {extras.hotelCount} {extras.hotelCount !== 1 ? 'hotéis' : 'hotel'}</span>
+          </div>
+        </div>
+      </Link>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
@@ -144,48 +190,30 @@ function ViagensContent({ trips, allMembers, extrasMap }: Props) {
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="grid gap-6 md:grid-cols-2">
-          {filtered.map((trip) => {
-            const members = getMembersForTrip(trip.id);
-            const extras = extrasMap[trip.id] || { flightCount: 0, hotelCount: 0, computedStatus: 'upcoming' };
-            const badge = statusBadge(extras.computedStatus);
-            const isCompleted = extras.computedStatus === 'completed';
-
-            return (
-              <Link key={trip.id} href={`/viagens/${trip.id}`}>
-                <div className={`bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-100 cursor-pointer ${isCompleted ? 'opacity-60' : ''}`}>
-                  <div className="flex items-start justify-between mb-3">
-                    <h2 className="text-lg font-bold text-[var(--color-navy)]">{trip.name}</h2>
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${badge.cls}`}>
-                      {badge.label}
-                    </span>
-                  </div>
-                  <p className="text-gray-500 text-sm mb-4">📍 {trip.destination}</p>
-                  <p className="text-gray-600 text-sm mb-4">📅 {formatDate(trip.start_date)} — {formatDate(trip.end_date)}</p>
-                  <div className="flex gap-2 flex-wrap text-sm text-gray-500">
-                    👥{' '}
-                    {members.map((m, i) => (
-                      <span key={m.id}>
-                        <button
-                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPersonFilter(m.member_name); }}
-                          className="text-[var(--color-navy)] hover:underline font-medium"
-                        >
-                          {m.member_name}
-                        </button>
-                        {i < members.length - 1 ? ', ' : ''}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex gap-4 mt-3 text-xs text-gray-400">
-                    <span>✈️ {extras.flightCount} voo{extras.flightCount !== 1 ? 's' : ''}</span>
-                    <span>🏨 {extras.hotelCount} {extras.hotelCount !== 1 ? 'hotéis' : 'hotel'}</span>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+          {currentTrips.map((trip) => renderCard(trip))}
         </div>
-        {filtered.length === 0 && (
+
+        {currentTrips.length === 0 && pastTrips.length === 0 && (
           <p className="text-center text-gray-400 mt-12">Nenhuma viagem encontrada com esses filtros.</p>
+        )}
+        {currentTrips.length === 0 && pastTrips.length > 0 && (
+          <p className="text-center text-gray-400 mt-12">Nenhuma viagem próxima.</p>
+        )}
+
+        {pastTrips.length > 0 && (
+          <div className="mt-10">
+            <button
+              onClick={() => setShowPast((v) => !v)}
+              className="text-sm text-gray-400 hover:text-gray-600 font-medium select-none"
+            >
+              {showPast ? '▾' : '▸'} {showPast ? 'Ocultar' : 'Ver'} {pastTrips.length} viagem{pastTrips.length !== 1 ? 'ns' : ''} passada{pastTrips.length !== 1 ? 's' : ''}
+            </button>
+            {showPast && (
+              <div className="grid gap-6 md:grid-cols-2 mt-4">
+                {pastTrips.map((trip) => renderCard(trip))}
+              </div>
+            )}
+          </div>
         )}
       </main>
     </div>
